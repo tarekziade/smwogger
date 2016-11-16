@@ -1,0 +1,11 @@
+*.un~
+.DS_Store
+bin
+include
+lib
+.Python
+__pycache__
+*.pyc
+smwogger.egg-info
+.coverage
+.tox

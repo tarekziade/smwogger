@@ -1,0 +1,3 @@
+requests
+swagger-parser
+six
