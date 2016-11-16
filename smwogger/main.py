@@ -36,7 +36,7 @@ def main():
     runner = OperationRunner(parser, data)
 
     for verb, endpoint, options in runner.items():
-        with console('Checking %s %s' % (verb, endpoint)):
+        with console('Checking %s %s' % (verb, data.path(endpoint))):
             try:
                 runner(verb, endpoint, **options)
             except Exception:

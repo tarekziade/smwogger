@@ -1,0 +1,11 @@
+{"path": {"prod": "firefox",
+          "ver": "52",
+          "channel": "beta",
+          "locale": "FR",
+          "territory": "fr",
+          "dist": "40",
+          "distver": "1",
+          "cohort": "default"}
+}
+
+

@@ -1,4 +1,6 @@
 import requests
+import json
+import os
 
 
 class DataPicker(object):
@@ -6,4 +8,11 @@ class DataPicker(object):
         if data_url is None:
             self.data = {}
         else:
-            self.data = requests.get(data_url).json()
+            if os.path.exists(data_url):
+                with open(data_url) as f:
+                    self.data = json.loads(f.read())
+            else:
+                self.data = requests.get(data_url).json()
+
+    def path(self, path):
+        return path.format(**self.data.get('path', {}))

@@ -31,8 +31,7 @@ class OperationRunner(object):
                 yield verb, endpoint, options
 
     def __call__(self, verb, endpoint, **options):
-        if verb != 'GET':
-            raise NotImplementedError()
+        endpoint = self.data_picker.path(endpoint)
         oid = options['operationId']
         runner = _OPS.get(oid, self._default_runner)
         return runner(verb, endpoint, **options)
@@ -42,7 +41,6 @@ class OperationRunner(object):
         res = meth(endpoint)
         statuses = [int(st) for st in options['responses'].keys()]
         assert res.status_code in statuses
-
 
     def get_operation(name):
         return _OPS.get(name, default_op)
