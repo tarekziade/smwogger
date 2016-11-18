@@ -5,7 +5,11 @@
           "territory": "fr",
           "dist": "40",
           "distver": "1",
-          "cohort": "default"}
+          "cohort": "default"},
+ "operations": {
+   "returnCohortSettings":
+      {"parameters": ""}
+ }
 }
 
 

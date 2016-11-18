@@ -23,22 +23,23 @@ class OperationRunner(object):
         self.scheme = schemes[0]
         self.paths = parser.specification['paths']
 
-    def items(self):
+    def operations(self):
         for path, spec in self.parser.specification['paths'].items():
             endpoint = urlunparse((self.scheme, self.host, path, '', '', ''))
             for verb, options in spec.items():
                 verb = verb.upper()
-                yield verb, endpoint, options
+                options['verb'] = verb.upper()
+                options['endpoint'] = endpoint
+                yield options['operationId'], options
 
-    def __call__(self, verb, endpoint, **options):
-        endpoint = self.data_picker.path(endpoint)
-        oid = options['operationId']
-        runner = _OPS.get(oid, self._default_runner)
-        return runner(verb, endpoint, **options)
+    def __call__(self, operation_id, **options):
+        endpoint = self.data_picker.path(options['endpoint'])
+        runner = _OPS.get(operation_id, self._default_runner)
+        return runner(operation_id, **options)
 
-    def _default_runner(self, verb, endpoint, **options):
-        meth = getattr(requests, verb.lower())
-        res = meth(endpoint)
+    def _default_runner(self, operation_id, **options):
+        meth = getattr(requests, options['verb'].lower())
+        res = meth(options['endpoint'])
         statuses = [int(st) for st in options['responses'].keys()]
         assert res.status_code in statuses
 

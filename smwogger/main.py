@@ -35,9 +35,9 @@ def main():
 
     runner = OperationRunner(parser, data)
 
-    for verb, endpoint, options in runner.items():
-        with console('Checking %s %s' % (verb, data.path(endpoint))):
+    for oid, options in runner.operations():
+        with console('Checking %s' % oid):
             try:
-                runner(verb, endpoint, **options)
+                runner(oid, **options)
             except Exception:
                 raise
