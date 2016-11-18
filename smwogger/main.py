@@ -35,7 +35,7 @@ def main():
 
     runner = OperationRunner(parser, data)
 
-    for oid, options in runner.operations():
+    for oid, options in runner.scenario():
         with console('Checking %s' % oid):
             try:
                 runner(oid, **options)
