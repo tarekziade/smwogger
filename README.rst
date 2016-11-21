@@ -3,10 +3,100 @@ Smwogger
 ========
 
 
-Smwogger is a smoke test tool and an extension for Swagger.
+**Smwogger** (pronounced smoger) is a smoke test tool for Swagger.
+
+Smwogger does not intent to replace tests that require to do more that
+a simple sequence of operations performed on a server. If you have
+to do anything more complex, you should use other tools and
+a full programming language like Python.
+
+Smwogger intent is to provide a quick and simple way to smoke
+test a deployment.
 
 To add a smoke test for you API, add an **x-smoke-test** section
 in your YAML or JSON file, describing your smoke test scenario.
+
+Then, you can run the test by pointing the Swagger spec URL
+(or path to a file)::
+
+    $ bin/smwogger smwogger/tests/shavar.yaml
+    Scanning spec... OK
+
+            This is project 'Shavar Service'
+            Mozilla's implementation of the Safe Browsing protocol
+            Version 0.7.0
+
+
+    Running Scenario
+    1:getHeartbeat... OK
+    2:getDownloads... OK
+    3:getDownloads... OK
+
+If you need to get details about the requests and responses sent, you can
+use the **-v** option::
+
+    $ bin/smwogger -v smwogger/tests/shavar.yaml
+    Scanning spec... OK
+
+            This is project 'Shavar Service'
+            Mozilla's implementation of the Safe Browsing protocol
+            Version 0.7.0
+
+
+    Running Scenario
+    1:getHeartbeat...
+    GET https://shavar.somwehere.com/__heartbeat__
+    >>>
+    HTTP/1.1 200 OK
+    Content-Type: text/plain; charset=UTF-8
+    Date: Mon, 21 Nov 2016 14:03:19 GMT
+    Content-Length: 2
+    Connection: keep-alive
+
+    OK
+    <<<
+    OK
+    2:getDownloads...
+    POST https://shavar.somwehere.com/downloads
+    Content-Length: 30
+
+    moztestpub-track-digest256;a:1
+
+    >>>
+    HTTP/1.1 200 OK
+    Content-Type: application/octet-stream
+    Date: Mon, 21 Nov 2016 14:03:23 GMT
+    Content-Length: 118
+    Connection: keep-alive
+
+    n:3600
+    i:moztestpub-track-digest256
+    ad:1
+    u:tracking-protection.somwehere.com/moztestpub-track-digest256/1469223014
+
+    <<<
+    OK
+    3:getDownloads...
+    POST https://shavar.somwehere.com/downloads
+    Content-Length: 35
+
+    moztestpub-trackwhite-digest256;a:1
+
+    >>>
+    HTTP/1.1 200 OK
+    Content-Type: application/octet-stream
+    Date: Mon, 21 Nov 2016 14:03:23 GMT
+    Content-Length: 128
+    Connection: keep-alive
+
+    n:3600
+    i:moztestpub-trackwhite-digest256
+    ad:1
+    u:tracking-protection.somwehere.com/moztestpub-trackwhite-digest256/1469551567
+
+    <<<
+    OK
+
 
 Scenario
 ========
