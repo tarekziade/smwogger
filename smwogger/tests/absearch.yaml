@@ -25,6 +25,8 @@ x-smoke-test:
     - status: 200
   - - addUserToCohort
     - status: 200
+      headers:
+        Content-Type: application/json
       path:
         locale: en-US
         territory: US
@@ -34,6 +36,8 @@ x-smoke-test:
           default: default
   - - returnCohortSettings
     - status: 200
+      headers:
+        Content-Type: application/json
       path:
         locale: en-US
         territory: US

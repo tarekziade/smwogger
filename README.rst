@@ -19,12 +19,17 @@ For each operation, you can provide a status code.
 Smwogger will play the sequence and control the status code
 for each operation.
 
+You can also control some headers by defining their names
+and values in a headers section.
+
 Example in YAML ::
 
     x-smoke-test:
       scenario:
       - - getSomething
         - status: 200
+          headers:
+            Content-Type: application/json
       - - getSomethingElse
         - status: 200
       - - getSomething

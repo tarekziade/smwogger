@@ -105,6 +105,13 @@ class OperationRunner(object):
                                              res.status_code))
                 raise AssertionError()
 
+        if 'headers' in options:
+            for name, expected in options['headers'].items():
+                got = res.headers.get(name)
+                if got != expected:
+                    print('Bad value for header %s' % name)
+                    print('Got %r, expected %r' % (got, expected))
+                    raise AssertionError()
 
         # provided by swagger
         else:
