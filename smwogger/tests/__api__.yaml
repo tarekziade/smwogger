@@ -13,6 +13,26 @@ info:
   x-mozilla-services:
     homepage: https://github.com/mozilla-services/absearch
     fullEndpointsDescription: true
+x-smoke-test:
+  path:
+    prod: firefox
+    ver: 43
+    channel: release
+    locale: en-US
+    territory: US
+    dist: default
+    distver: default
+  scenario:
+  - - getHeartbeat
+    - status: 200
+  - - addUserToCohort
+    - status: 200
+      vars:
+        cohort:
+          query: cohort
+          default: default
+  - - returnCohortSettings
+    - status: 200
 schemes:
     - http
 paths:

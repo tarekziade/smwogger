@@ -4,15 +4,11 @@ import os
 
 
 class DataPicker(object):
-    def __init__(self, data_url=None):
-        if data_url is None:
+    def __init__(self, data=None):
+        if data is None:
             self.data = {}
         else:
-            if os.path.exists(data_url):
-                with open(data_url) as f:
-                    self.data = json.loads(f.read())
-            else:
-                self.data = requests.get(data_url).json()
+            self.data = data
         self._vars = {}
 
     def scenario(self):

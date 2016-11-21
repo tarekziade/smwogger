@@ -1,3 +1,4 @@
+import os
 import sys
 import argparse
 
@@ -14,17 +15,19 @@ def main():
     parser = argparse.ArgumentParser(
         description='Smwogger. Smoke Tester.')
 
-    parser.add_argument('--data', help='Data file or URL',
-                        type=str, default=None)
-
     parser.add_argument('url', help='Swagger URL')
     args = parser.parse_args()
     url = args.url
-    data = DataPicker(args.data)
 
     with console("Scanning spec"):
-        swagger = yaml.load(requests.get(url).content)
+        if os.path.exists(url):
+            with open(url) as f:
+                swagger = yaml.load(f.read())
+        else:
+            swagger = yaml.load(requests.get(url).content)
+
         parser = SwaggerParser(swagger_dict=swagger)
+        data = DataPicker(parser.specification['x-smoke-test'])
 
     print()
     print("\t\tThis is project %r" % parser.specification['info']['title'])
