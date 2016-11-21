@@ -18,8 +18,6 @@ x-smoke-test:
     prod: firefox
     ver: 43
     channel: release
-    locale: en-US
-    territory: US
     dist: default
     distver: default
   scenario:
@@ -27,12 +25,18 @@ x-smoke-test:
     - status: 200
   - - addUserToCohort
     - status: 200
+      path:
+        locale: en-US
+        territory: US
       vars:
         cohort:
           query: cohort
           default: default
   - - returnCohortSettings
     - status: 200
+      path:
+        locale: en-US
+        territory: US
 schemes:
     - http
 paths:

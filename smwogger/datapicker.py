@@ -14,9 +14,10 @@ class DataPicker(object):
     def scenario(self):
         return self.data.get('scenario', [])
 
-    def path(self, path):
+    def path(self, path, **extra):
         vars = dict(self.data.get('path', {}))
         vars.update(self._vars)
+        vars.update(extra)
         return path.format(**vars)
 
     def set_var(self, name, value):

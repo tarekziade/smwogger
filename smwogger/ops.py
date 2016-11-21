@@ -70,7 +70,9 @@ class OperationRunner(object):
                 yield options['operationId'], options
 
     def __call__(self, operation_id, **options):
-        options['endpoint'] = self.data_picker.path(options['endpoint'])
+        extra = options.get('path', {})
+        options['endpoint'] = self.data_picker.path(options['endpoint'],
+                                                    **extra)
         runner = _OPS.get(operation_id, self._default_runner)
         return runner(operation_id, **options)
 
