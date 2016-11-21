@@ -114,7 +114,7 @@ operations, to replace variables in path templates, or to fill response data.
 The path formatting is done automatically. Smwogger will look first at
 variables defined in operations, then at the path sections.
 
-If you want to use a variable in a body, you need to use the ${formatting}
+If you want to use a variable in a body, you need to use the ${formatting}::
 
     x-smoke-test:
       scenario:
