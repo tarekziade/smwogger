@@ -12,6 +12,18 @@ from smwogger.datapicker import DataPicker
 from smwogger.ops import OperationRunner
 
 
+def get_runner(url, verbose=False):
+    if os.path.exists(url):
+        with open(url) as f:
+            swagger = yaml.load(f.read())
+    else:
+        swagger = yaml.load(requests.get(url).content)
+
+    parser = SwaggerParser(swagger_dict=swagger)
+    data = DataPicker(parser.specification['x-smoke-test'])
+    return OperationRunner(parser, data, verbose=verbose)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Smwogger. Smoke Tester.')
@@ -33,14 +45,7 @@ def main():
         logger.propagate = False
 
     with console("Scanning spec"):
-        if os.path.exists(url):
-            with open(url) as f:
-                swagger = yaml.load(f.read())
-        else:
-            swagger = yaml.load(requests.get(url).content)
-
-        parser = SwaggerParser(swagger_dict=swagger)
-        data = DataPicker(parser.specification['x-smoke-test'])
+        runner = get_runner(url, verbose=args.verbose)
 
     print()
     print("\t\tThis is project %r" % parser.specification['info']['title'])
@@ -48,8 +53,6 @@ def main():
     print("\t\tVersion %s" % parser.specification['info']['version'])
     print()
     print()
-
-    runner = OperationRunner(parser, data, verbose=args.verbose)
 
     print('Running Scenario')
     for index, (oid, options) in enumerate(runner.scenario()):
