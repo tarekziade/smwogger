@@ -9,7 +9,7 @@ _OPS = {}
 def print_request(req):
     raw = '\n' + req.method + ' ' + req.url
     if len(req.headers) > 0:
-        headers = '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items())
+        headers = '\n'.join('%s: %s' % (k, v) for k, v in req.headers.items())
         raw += '\n' + headers
 
     if req.body:
@@ -101,7 +101,7 @@ class OperationRunner(object):
             print_response(res)
             logger.info('<<<')
 
-       # provided by the scenario (maybe should put it in responses)
+        # provided by the scenario (maybe should put it in responses)
         if 'status' in resp_options:
             wanted = int(resp_options['status'])
             if res.status_code != wanted:
@@ -122,8 +122,8 @@ class OperationRunner(object):
             statuses = [int(st) for st in options['responses'].keys()]
             if res.status_code not in statuses:
                 print("Bad Status code on %r" % options['endpoint'])
-                print("Wanted %s, Got %d" % (' or '.join(['%d' for s in statuses]),
-                                             res.status_code))
+                statuses = ' or '.join(['%d' for s in statuses])
+                print("Wanted %s, Got %d" % (statuses, res.status_code))
                 raise AssertionError()
 
         # extracting variables if needed
@@ -135,6 +135,3 @@ class OperationRunner(object):
                 value = res.json().get(query, default)
 
             self.data_picker.set_var(varname, value)
-
-    def get_operation(name):
-        return _OPS.get(name, default_op)

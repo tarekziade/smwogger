@@ -1,7 +1,3 @@
-import requests
-import json
-import os
-
 
 class DataPicker(object):
     def __init__(self, data=None):
