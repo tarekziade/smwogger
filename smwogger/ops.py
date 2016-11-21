@@ -53,7 +53,8 @@ class OperationRunner(object):
     def scenario(self):
         scenario = self.data_picker.scenario()
         if scenario == []:
-            return self.operations()
+            for opid, options in self.operations():
+                yield opid, options
         else:
             ops = dict(list(self.operations()))
             for step in scenario:
