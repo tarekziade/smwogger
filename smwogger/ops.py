@@ -56,7 +56,8 @@ class OperationRunner(object):
             return self.operations()
         else:
             ops = dict(list(self.operations()))
-            for opid, options in scenario:
+            for step in scenario:
+                opid, options = step.popitem()
                 options.update(ops[opid])
                 yield opid, options
 
@@ -70,7 +71,7 @@ class OperationRunner(object):
                 yield options['operationId'], options
 
     def __call__(self, operation_id, **options):
-        extra = options.get('path', {})
+        extra = options.get('request', {}).get('path', {})
         options['endpoint'] = self.data_picker.path(options['endpoint'],
                                                     **extra)
         runner = _OPS.get(operation_id, self._default_runner)
@@ -80,8 +81,11 @@ class OperationRunner(object):
         endpoint = options['endpoint']
         verb = options['verb']
 
-        if 'body' in options:
-            req = requests.Request(verb, endpoint, data=options['body'])
+        resp_options = options.get('response', {})
+        req_options = options.get('request', {})
+
+        if 'body' in req_options:
+            req = requests.Request(verb, endpoint, data=req_options['body'])
         else:
             req = requests.Request(verb, endpoint)
 
@@ -98,15 +102,15 @@ class OperationRunner(object):
             logger.info('<<<')
 
        # provided by the scenario (maybe should put it in responses)
-        if 'status' in options:
-            if res.status_code != int(options['status']):
+        if 'status' in resp_options:
+            wanted = int(resp_options['status'])
+            if res.status_code != wanted:
                 print("Bad Status code on %r" % options['endpoint'])
-                print("Wanted %d, Got %d" % (int(options['status']),
-                                             res.status_code))
+                print("Wanted %d, Got %d" % (wanted, res.status_code))
                 raise AssertionError()
 
-        if 'headers' in options:
-            for name, expected in options['headers'].items():
+        if 'headers' in resp_options:
+            for name, expected in resp_options['headers'].items():
                 got = res.headers.get(name)
                 if got != expected:
                     print('Bad value for header %s' % name)
@@ -123,7 +127,7 @@ class OperationRunner(object):
                 raise AssertionError()
 
         # extracting variables if needed
-        vars = options.get('vars', [])
+        vars = resp_options.get('vars', [])
         if vars != []:
             for varname, data in vars.items():
                 default = data['default']

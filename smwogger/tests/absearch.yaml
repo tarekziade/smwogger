@@ -21,26 +21,31 @@ x-smoke-test:
     dist: default
     distver: default
   scenario:
-  - - getHeartbeat
-    - status: 200
-  - - addUserToCohort
-    - status: 200
-      headers:
-        Content-Type: application/json
-      path:
-        locale: en-US
-        territory: US
-      vars:
-        cohort:
-          query: cohort
-          default: default
-  - - returnCohortSettings
-    - status: 200
-      headers:
-        Content-Type: application/json
-      path:
-        locale: en-US
-        territory: US
+  - getHeartbeat:
+      response:
+        status: 200
+  - addUserToCohort:
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+        vars:
+          cohort:
+            query: cohort
+            default: default
+      request:
+        path:
+          locale: en-US
+          territory: US
+  - returnCohortSettings:
+      reponse:
+        status: 200
+        headers:
+          Content-Type: application/json
+      request:
+          path:
+            locale: en-US
+            territory: US
 schemes:
     - http
 paths:
