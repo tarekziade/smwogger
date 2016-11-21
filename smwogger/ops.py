@@ -1,8 +1,33 @@
 import requests
 from six.moves.urllib.parse import urlunparse
+from smwogger import logger
 
 
 _OPS = {}
+
+
+def print_request(req):
+    raw = '\n' + req.method + ' ' + req.url
+    if len(req.headers) > 0:
+        headers = '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items())
+        raw += '\n' + headers
+
+    if req.body:
+        raw += '\n\n' + req.body + '\n'
+
+    logger.info(raw)
+
+
+def print_response(resp):
+    raw = 'HTTP/1.1 %s %s\n' % (resp.status_code, resp.reason)
+    items = resp.headers.items()
+    headers = '\n'.join('{}: {}'.format(k, v) for k, v in items)
+    raw += headers
+
+    if resp.content:
+        raw += '\n\n' + resp.content.decode()
+
+    logger.info(raw)
 
 
 def operation(func):
@@ -15,13 +40,15 @@ def operation(func):
 
 
 class OperationRunner(object):
-    def __init__(self, parser, data_picker):
+    def __init__(self, parser, data_picker, verbose=False):
         self.data_picker = data_picker
+        self.verbose = verbose
         self.parser = parser
         self.host = parser.specification['host']
         schemes = parser.specification.get('schemes', ['https'])
         self.scheme = schemes[0]
         self.paths = parser.specification['paths']
+        self.session = requests.Session()
 
     def scenario(self):
         scenario = self.data_picker.scenario()
@@ -48,15 +75,34 @@ class OperationRunner(object):
         return runner(operation_id, **options)
 
     def _default_runner(self, operation_id, **options):
-        meth = getattr(requests, options['verb'].lower())
-        res = meth(options['endpoint'])
-        # provided by the scenario (maybe should put it in responses)
+        endpoint = options['endpoint']
+        verb = options['verb']
+
+        if 'body' in options:
+            req = requests.Request(verb, endpoint, data=options['body'])
+        else:
+            req = requests.Request(verb, endpoint)
+
+        prepared = req.prepare()
+
+        if self.verbose:
+            print_request(prepared)
+            logger.info('>>>')
+
+        res = self.session.send(prepared)
+
+        if self.verbose:
+            print_response(res)
+            logger.info('<<<')
+
+       # provided by the scenario (maybe should put it in responses)
         if 'status' in options:
             if res.status_code != int(options['status']):
                 print("Bad Status code on %r" % options['endpoint'])
                 print("Wanted %d, Got %d" % (int(options['status']),
                                              res.status_code))
                 raise AssertionError()
+
 
         # provided by swagger
         else:

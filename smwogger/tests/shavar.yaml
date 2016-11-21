@@ -15,6 +15,58 @@ info:
     fullEndpointsDescription: true
 schemes:
     - https
+x-smoke-test:
+  scenario:
+  - - getHeartbeat
+    - status: 200
+  - - getDownloads
+    - status: 200
+      body: base-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: baseeff-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: basew3c-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: content-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: contenteff-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: contentw3c-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozfull-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozfullstaging-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozplugin-block-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozplugin2-block-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozstd-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozstd-trackwhite-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozstdstaging-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: mozstdstaging-trackwhite-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: moztestpub-track-digest256;a:1
+  - - getDownloads
+    - status: 200
+      body: moztestpub-trackwhite-digest256;a:1
 paths:
     /__heartbeat__:
       get:
