@@ -47,10 +47,12 @@ def main():
     with console("Scanning spec"):
         runner = get_runner(url, verbose=args.verbose)
 
+    spec = runner.parser.specification
+
     print()
-    print("\t\tThis is project %r" % parser.specification['info']['title'])
-    print("\t\t%s" % parser.specification['info']['description'])
-    print("\t\tVersion %s" % parser.specification['info']['version'])
+    print("\t\tThis is project %r" % spec['info']['title'])
+    print("\t\t%s" % spec['info']['description'])
+    print("\t\tVersion %s" % spec['info']['version'])
     print()
     print()
 
