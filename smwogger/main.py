@@ -1,5 +1,7 @@
 import argparse
 import logging
+from functools import partial
+import imp
 
 from smwogger import logger
 from smwogger.cli import console
@@ -8,7 +10,11 @@ from smwogger.smoketest import SmokeTest
 
 
 def get_runner(url, test_url=None, verbose=False):
-    return SmokeTest(API(url, verbose=verbose), test_url)
+    if test_url and test_url.endswith('.py'):
+        script = imp.load_source('script', test_url)
+        return partial(script.scenario, API(url, verbose=verbose))
+    else:
+        return SmokeTest(API(url, verbose=verbose), test_url)
 
 
 def main():
@@ -37,19 +43,22 @@ def main():
     with console("Scanning spec"):
         runner = get_runner(url, test_url=args.test, verbose=args.verbose)
 
-    spec = runner.api.spec
+    if isinstance(runner, SmokeTest):
+        spec = runner.api.spec
+        print()
+        print("\t\tThis is project %r" % spec['info']['title'])
+        print("\t\t%s" % spec['info']['description'])
+        print("\t\tVersion %s" % spec['info']['version'])
+        print()
+        print()
 
-    print()
-    print("\t\tThis is project %r" % spec['info']['title'])
-    print("\t\t%s" % spec['info']['description'])
-    print("\t\tVersion %s" % spec['info']['version'])
-    print()
-    print()
-
-    print('Running Scenario')
-    for index, (oid, options) in enumerate(runner.scenario()):
-        with console('%d:%s' % (index + 1, oid)):
-            try:
-                runner(oid, **options)
-            except Exception:
-                raise
+        print('Running Scenario from x-smoke-test')
+        for index, (oid, options) in enumerate(runner.scenario()):
+            with console('%d:%s' % (index + 1, oid)):
+                try:
+                    runner(oid, **options)
+                except Exception:
+                    raise
+    else:
+        print('Running Python Scenario')
+        runner()

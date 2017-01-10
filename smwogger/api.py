@@ -49,14 +49,13 @@ class API(object):
             return partial(self._caller, name)
         raise AttributeError(name)
 
-    def _caller(self, operation_id, **options):
+    def _caller(self, operation_id, vars=None, **options):
         op = self._operations[operation_id]
-        data_reader = options.pop('data_reader', None)
+        if vars is None:
+            vars = {}
 
-        if 'endpoint' in options:
-            transformer = options.pop('endpoint')
-            op['endpoint'] = transformer(op['endpoint'])
-        endpoint = op['endpoint']
+        data_reader = options.pop('data_reader', None)
+        endpoint = op['endpoint'].format(**vars)
         verb = op['verb']
         options.update(op)
         resp_options = options.get('response', {})
@@ -112,6 +111,8 @@ class API(object):
                 query = data['query']
                 value = json_data.get(query, default)
                 data_reader(varname, value)
+
+        return res
 
     def _get_operations(self):
         ops = {}

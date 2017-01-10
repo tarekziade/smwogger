@@ -5,21 +5,23 @@ Smwogger
 
 **Smwogger** (pronounced smoger) is a smoke test tool for Swagger.
 
-Smwogger does not intent to replace tests that require to do more that
-a simple sequence of operations performed on a server. If you have
-to do anything more complex, you should use other tools and
-a full programming language like Python.
-
-Smwogger intent is to provide a quick and simple way to smoke
+Smwogger's goal is to provide a quick and simple way to smoke
 test a deployment.
 
-To add a smoke test for you API, add an **x-smoke-test** section
-in your YAML or JSON file, describing your smoke test scenario.
+To add a smoke test for you API, you have three options:
 
-Then, you can run the test by pointing the Swagger spec URL
-(or path to a file)::
+1. Add an **x-smoke-test** section in your Swagger spec, describing your
+   smoke test scenario.
+2. Have a specific file that contains the **x-smoke-test** section.
+3. Use the API class which binds its methods to Swagger operations
 
-    $ bin/smwogger smwogger/tests/shavar.yaml
+
+Example using x-smoke-test
+==========================
+
+You can run the test by pointing the Swagger spec URL (or path to a file)::
+
+    $ smwogger smwogger/tests/shavar.yaml
     Scanning spec... OK
 
             This is project 'Shavar Service'
@@ -35,7 +37,7 @@ Then, you can run the test by pointing the Swagger spec URL
 If you need to get details about the requests and responses sent, you can
 use the **-v** option::
 
-    $ bin/smwogger -v smwogger/tests/shavar.yaml
+    $ smwogger -v smwogger/tests/shavar.yaml
     Scanning spec... OK
 
             This is project 'Shavar Service'
@@ -98,8 +100,8 @@ use the **-v** option::
     OK
 
 
-Scenario
-========
+Describing your scenario
+========================
 
 A scenario is described by providing a sequence of operations to
 perform, given their **operationId**.
@@ -234,3 +236,30 @@ If you want to use a variable in a body, you need to use the ${formatting}::
       - doSomething:
           request:
             body: ${foo}
+
+
+Using the API
+=============
+
+
+If your scenario is too complex for fitting in the description,
+you can use a plain Python script in the --test option.
+
+A Python script test is a module with a **scenario** function.
+The function will be executed and will get an instance of the API
+class.
+
+Example::
+
+    from smwogger.cli import console
+
+    def scenario(api):
+        with console('Getting something'):
+            resp = api.getSomething()
+        assert resp.status_code == 200
+
+
+
+XXX more info here
+
+
