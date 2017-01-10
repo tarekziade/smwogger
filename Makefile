@@ -23,5 +23,4 @@ test_dependencies:
 	$(BIN)/pip install flake8 tox unittest2
 
 test: build test_dependencies
-	$(BIN)/flake8 smwogger
 	$(BIN)/tox

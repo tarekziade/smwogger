@@ -43,11 +43,10 @@ class API(object):
         schemes = self.spec.get('schemes', ['https'])
         self.scheme = schemes[0]
         self._operations = self._get_operations()
-        self.__getattr__ = self._getattr
 
-    def _getattr(self, name):
+    def __getattr__(self, name):
         if name in self._operations:
-            return partial(self._caller(name))
+            return partial(self._caller, name)
         raise AttributeError(name)
 
     def _caller(self, operation_id, **options):
