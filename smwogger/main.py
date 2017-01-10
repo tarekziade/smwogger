@@ -1,6 +1,7 @@
 import os
 import argparse
 import logging
+import mimetypes
 
 import yaml
 import requests
@@ -12,15 +13,40 @@ from smwogger.datapicker import DataPicker
 from smwogger.ops import OperationRunner
 
 
-def get_runner(url, verbose=False):
-    if os.path.exists(url):
-        with open(url) as f:
-            swagger = yaml.load(f.read())
-    else:
-        swagger = yaml.load(requests.get(url).content)
+_JSON_TYPES = ('application/vnd.api+json', 'application/json')
+_YAML_TYPES = ('application/x-yaml', 'text/yaml')
 
+if '.yaml' not in mimetypes.types_map:
+    mimetypes.types_map['.yaml'] = 'application/x-yaml'
+
+
+def _decoder(mime):
+    if mime in _YAML_TYPES:
+        return yaml.load
+    # we'll just try json
+    return yaml.load
+
+
+def get_content(url):
+    if os.path.exists(url):
+        mime = mimetypes.guess_type(url)[0]
+        with open(url) as f:
+            return _decoder(mime)(f.read())
+    else:
+        resp = requests.get(url)
+        content_type = resp.header.get('Content-Type', 'application/json')
+        return _decoder(content_type)(requests.get(url).content)
+
+
+def get_runner(url, test_url=None, verbose=False):
+    swagger = get_content(url)
     parser = SwaggerParser(swagger_dict=swagger)
-    data = DataPicker(parser.specification['x-smoke-test'])
+    spec = parser.specification
+
+    if test_url is not None:
+        spec['x-smoke-test'] = get_content(test_url)['x-smoke-test']
+
+    data = DataPicker(spec['x-smoke-test'])
     return OperationRunner(parser, data, verbose=verbose)
 
 
@@ -28,7 +54,10 @@ def main():
     parser = argparse.ArgumentParser(
         description='Smwogger. Smoke Tester.')
 
-    parser.add_argument('url', help='Swagger URL')
+    parser.add_argument('url', help='Swagger URL or file')
+    parser.add_argument('--test', help='Test URL or file',
+                        default=None)
+
     parser.add_argument('-v', '--verbose', help="Display more info",
                         action='store_true', default=False)
 
@@ -45,7 +74,7 @@ def main():
         logger.propagate = False
 
     with console("Scanning spec"):
-        runner = get_runner(url, verbose=args.verbose)
+        runner = get_runner(url, test_url=args.test, verbose=args.verbose)
 
     spec = runner.parser.specification
 

@@ -85,9 +85,11 @@ class OperationRunner(object):
         resp_options = options.get('response', {})
         req_options = options.get('request', {})
 
+        extra = {}
         if 'body' in req_options and 'data' not in req_options:
-            req_options['data'] = req_options.pop('body')
-        req = requests.Request(verb, endpoint, **req_options)
+            extra['data'] = req_options.pop('body')
+
+        req = requests.Request(verb, endpoint, **extra)
 
         prepared = req.prepare()
 

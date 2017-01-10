@@ -1,0 +1,33 @@
+x-smoke-test:
+  path:
+    prod: firefox
+    ver: 43
+    channel: release
+    dist: default
+    distver: default
+  scenario:
+  - getHeartbeat:
+      response:
+        status: 200
+  - addUserToCohort:
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+        vars:
+          cohort:
+            query: cohort
+            default: default
+      request:
+        path:
+          locale: en-US
+          territory: US
+  - returnCohortSettings:
+      reponse:
+        status: 200
+        headers:
+          Content-Type: application/json
+      request:
+          path:
+            locale: en-US
+            territory: US
