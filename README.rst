@@ -113,6 +113,9 @@ Example in YAML ::
     x-smoke-test:
       scenario:
       - getSomething:
+          request:
+            params:
+              foo: bar
           response:
             status: 200
             headers:
