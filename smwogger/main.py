@@ -9,45 +9,12 @@ from swagger_parser import SwaggerParser
 
 from smwogger import logger
 from smwogger.cli import console
-from smwogger.datapicker import DataPicker
-from smwogger.ops import OperationRunner
-
-
-_JSON_TYPES = ('application/vnd.api+json', 'application/json')
-_YAML_TYPES = ('application/x-yaml', 'text/yaml')
-
-if '.yaml' not in mimetypes.types_map:
-    mimetypes.types_map['.yaml'] = 'application/x-yaml'
-
-
-def _decoder(mime):
-    if mime in _YAML_TYPES:
-        return yaml.load
-    # we'll just try json
-    return yaml.load
-
-
-def get_content(url):
-    if os.path.exists(url):
-        mime = mimetypes.guess_type(url)[0]
-        with open(url) as f:
-            return _decoder(mime)(f.read())
-    else:
-        resp = requests.get(url)
-        content_type = resp.header.get('Content-Type', 'application/json')
-        return _decoder(content_type)(requests.get(url).content)
+from smwogger.api import API
+from smwogger.smoketest import SmokeTest
 
 
 def get_runner(url, test_url=None, verbose=False):
-    swagger = get_content(url)
-    parser = SwaggerParser(swagger_dict=swagger)
-    spec = parser.specification
-
-    if test_url is not None:
-        spec['x-smoke-test'] = get_content(test_url)['x-smoke-test']
-
-    data = DataPicker(spec['x-smoke-test'])
-    return OperationRunner(parser, data, verbose=verbose)
+    return SmokeTest(API(url, verbose=verbose), test_url)
 
 
 def main():
@@ -76,7 +43,7 @@ def main():
     with console("Scanning spec"):
         runner = get_runner(url, test_url=args.test, verbose=args.verbose)
 
-    spec = runner.parser.specification
+    spec = runner.api.spec
 
     print()
     print("\t\tThis is project %r" % spec['info']['title'])

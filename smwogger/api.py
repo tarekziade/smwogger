@@ -1,9 +1,10 @@
 import requests
+from functools import partial
 from six.moves.urllib.parse import urlunparse
+from swagger_parser import SwaggerParser
+
+from smwogger.util import get_content
 from smwogger import logger
-
-
-_OPS = {}
 
 
 def print_request(req):
@@ -30,67 +31,44 @@ def print_response(resp):
     logger.info(raw)
 
 
-def operation(func):
-    _OPS[func.__name__] = func
-
-    def _operation(*args, **kw):
-        return func(*args, **kw)
-
-    return _operation
 
 
-class OperationRunner(object):
-    def __init__(self, parser, data_picker, verbose=False):
-        self.data_picker = data_picker
-        self.verbose = verbose
-        self.parser = parser
-        self.host = parser.specification['host']
-        schemes = parser.specification.get('schemes', ['https'])
-        self.scheme = schemes[0]
-        self.paths = parser.specification['paths']
+class API(object):
+
+    def __init__(self, path_or_url, verbose=False):
+        self._content = get_content(path_or_url)
+        self._parser = SwaggerParser(swagger_dict=self._content)
+        self.spec = self._parser.specification
         self.session = requests.Session()
+        self.verbose = verbose
+        self.host = self.spec['host']
+        schemes = self.spec.get('schemes', ['https'])
+        self.scheme = schemes[0]
+        self._operations = self._get_operations()
+        self.__getattr__ = self._getattr
 
-    def scenario(self):
-        scenario = self.data_picker.scenario()
-        if scenario == []:
-            for opid, options in self.operations():
-                yield opid, options
-        else:
-            ops = dict(list(self.operations()))
-            for step in scenario:
-                opid, options = step.popitem()
-                options.update(ops[opid])
-                yield opid, options
+    def _getattr(self, name):
+        if name in self._operations:
+            return partial(self._caller(name))
+        raise AttributeError(name)
 
-    def operations(self):
-        for path, spec in self.parser.specification['paths'].items():
-            endpoint = urlunparse((self.scheme, self.host, path, '', '', ''))
-            for verb, options in spec.items():
-                verb = verb.upper()
-                options['verb'] = verb.upper()
-                options['endpoint'] = endpoint
-                yield options['operationId'], options
+    def _caller(self, operation_id, **options):
+        op = self._operations[operation_id]
+        data_reader = options.pop('data_reader', None)
 
-    def __call__(self, operation_id, **options):
-        extra = options.get('request', {}).get('path', {})
-        options['endpoint'] = self.data_picker.path(options['endpoint'],
-                                                    **extra)
-        runner = _OPS.get(operation_id, self._default_runner)
-        return runner(operation_id, **options)
-
-    def _default_runner(self, operation_id, **options):
-        endpoint = options['endpoint']
-        verb = options['verb']
-
+        if 'endpoint' in options:
+            transformer = options.pop('endpoint')
+            op['endpoint'] = transformer(op['endpoint'])
+        endpoint = op['endpoint']
+        verb = op['verb']
+        options.update(op)
         resp_options = options.get('response', {})
         req_options = options.get('request', {})
-
         extra = {}
         if 'body' in req_options and 'data' not in req_options:
             extra['data'] = req_options.pop('body')
 
         req = requests.Request(verb, endpoint, **extra)
-
         prepared = req.prepare()
 
         if self.verbose:
@@ -130,10 +108,21 @@ class OperationRunner(object):
 
         # extracting variables if needed
         vars = resp_options.get('vars', [])
-        if vars != []:
+        if vars != [] and data_reader:
+            json_data = res.json()
             for varname, data in vars.items():
                 default = data['default']
                 query = data['query']
-                value = res.json().get(query, default)
+                value = json_data.get(query, default)
+                data_reader(varname, value)
 
-            self.data_picker.set_var(varname, value)
+    def _get_operations(self):
+        ops = {}
+        for path, spec in self.spec['paths'].items():
+            endpoint = urlunparse((self.scheme, self.host, path, '', '', ''))
+            for verb, options in spec.items():
+                verb = verb.upper()
+                options['verb'] = verb.upper()
+                options['endpoint'] = endpoint
+                ops[options['operationId']] = options
+        return ops
