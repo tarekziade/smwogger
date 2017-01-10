@@ -1,11 +1,5 @@
-import os
 import argparse
 import logging
-import mimetypes
-
-import yaml
-import requests
-from swagger_parser import SwaggerParser
 
 from smwogger import logger
 from smwogger.cli import console

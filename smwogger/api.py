@@ -31,8 +31,6 @@ def print_response(resp):
     logger.info(raw)
 
 
-
-
 class API(object):
 
     def __init__(self, path_or_url, verbose=False):

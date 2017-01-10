@@ -3,7 +3,6 @@ import mimetypes
 import json
 import yaml
 import requests
-from swagger_parser import SwaggerParser
 
 
 _JSON_TYPES = ('application/vnd.api+json', 'application/json')
@@ -17,7 +16,7 @@ def _decoder(mime):
     if mime in _YAML_TYPES:
         return yaml.load
     # we'll just try json
-    return yaml.load
+    return json.load
 
 
 def get_content(url):
