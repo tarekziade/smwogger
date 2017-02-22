@@ -1,5 +1,5 @@
 swagger: "2.0"
-host: search.stage.mozaws.net
+host: localhost:8888
 info:
   title: ABSearch Server
   description: lightweight a/b testing tool for search options

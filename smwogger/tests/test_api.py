@@ -1,6 +1,8 @@
 import unittest
 import os
+
 from smwogger.api import API
+from smwogger.tests.support import coserver
 
 
 HERE = os.path.dirname(__file__)
@@ -12,7 +14,8 @@ class TestAPI(unittest.TestCase):
     def test_names(self):
         api = API(SPEC)
 
-        api.getHeartbeat()
+        with coserver():
+            api.getHeartbeat()
 
         for attr in ('getHeartbeat', 'addUserToCohort',
                      'returnCohortSettings'):
