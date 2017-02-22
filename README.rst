@@ -2,6 +2,13 @@
 Smwogger
 ========
 
+.. image:: http://coveralls.io/repos/github/tarekziade/smwogger/badge.svg?branch=master
+   :target: https://coveralls.io/github/tarekziade/smwogger?branch=master
+
+.. image:: http://travis-ci.org/tarekziade/smwogger.svg?branch=master
+   :target: https://travis-ci.org/tarekziade/smwogger
+
+
 
 **Smwogger** (pronounced smoger) is a smoke test tool for Swagger.
 
