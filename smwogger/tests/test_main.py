@@ -22,7 +22,7 @@ class TestMain(unittest.TestCase):
 
     def test_main(self):
 
-        options = 'smwogger', 'http://localhost:8888/api.json'
+        options = 'smwogger', 'http://localhost:8888/api.json', '--verbose'
 
         with coserver(), set_args(*options) as out:
             try:
@@ -32,3 +32,5 @@ class TestMain(unittest.TestCase):
 
         stdout = out[0].read().strip()
         self.assertEqual(stdout, WANTED)
+        stderr = out[1].read().strip()
+        self.assertTrue("Content-Length: 16" in stderr)
