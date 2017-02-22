@@ -23,6 +23,11 @@ def swagger():
     return data
 
 
+@app.route('/1/<path:path>')
+def someapi(*args, **kw):
+    return {}
+
+
 @app.route('/')
 def root():
     return {'result': 'OK'}
