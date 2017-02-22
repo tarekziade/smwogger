@@ -12,9 +12,13 @@ def run_server(port=8888):
     """Running in a subprocess to avoid any interference
     """
     def _run():
+        import sys
+        import io
+
+        sys.stderr = sys.stdout = io.StringIO()
+
         from smwogger.tests.service import application
         import signal
-        import sys
 
         def _shutdown(*args, **kw):
             application.close()

@@ -12,7 +12,7 @@ SPEC = os.path.join(HERE, 'absearch.yaml')
 class TestAPI(unittest.TestCase):
 
     def test_names(self):
-        api = API(SPEC)
+        api = API(SPEC, verbose=True)
 
         with coserver():
             api.getHeartbeat()
@@ -29,8 +29,8 @@ class TestAPI(unittest.TestCase):
 
     def test_read_spec_from_url(self):
         with coserver():
-            api = API('http://localhost:8888/api.yaml')
+            api = API('http://localhost:8888/api.yaml', verbose=True)
             api.getDefault()
 
-            api = API('http://localhost:8888/api.json')
+            api = API('http://localhost:8888/api.json', verbose=True)
             api.getDefault()
