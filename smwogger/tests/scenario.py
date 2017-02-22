@@ -14,8 +14,7 @@ def scenario(api):
 
     assert resp.status_code == 200
 
-    with console('Playing with the corhorts'):
-
+    with console('Playing with the cohorts'):
         vars = {'locale': 'en-US',
                 'territory': 'US'}
         vars.update(_VARS)
