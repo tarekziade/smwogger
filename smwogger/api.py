@@ -63,6 +63,8 @@ class API(object):
         extra = {}
         if 'body' in req_options and 'data' not in req_options:
             extra['data'] = req_options.pop('body')
+        if 'headers' in req_options:
+            extra['headers'] = req_options['headers']
 
         req = requests.Request(verb, endpoint, **extra)
         prepared = req.prepare()

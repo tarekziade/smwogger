@@ -28,9 +28,16 @@ class TestAPI(unittest.TestCase):
             api.getDefault()
 
     def test_read_spec_from_url(self):
+        headers = {'Something': 'here'}
+
         with coserver():
             api = API('http://localhost:8888/api.yaml', verbose=True)
             api.getDefault()
 
             api = API('http://localhost:8888/api.json', verbose=True)
             api.getDefault()
+
+            res = api.getHeartbeat(request={'headers': headers})
+
+        echoed_headers = res.json()['headers']
+        self.assertEqual(echoed_headers['Something'], 'here')

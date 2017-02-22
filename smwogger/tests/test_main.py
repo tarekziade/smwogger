@@ -33,4 +33,4 @@ class TestMain(unittest.TestCase):
         stdout = out[0].read().strip()
         self.assertEqual(stdout, WANTED)
         stderr = out[1].read().strip()
-        self.assertTrue("Content-Length: 16" in stderr)
+        self.assertTrue("Content-Type: application/json" in stderr)

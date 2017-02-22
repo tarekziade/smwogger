@@ -1,4 +1,4 @@
-from bottle import response, Bottle
+from bottle import response, Bottle, request
 import os
 import yaml
 
@@ -35,4 +35,4 @@ def root():
 
 @app.route('/__heartbeat__')
 def hb():
-    return {'result': 'OK'}
+    return {'result': 'OK', 'headers': dict(request.headers)}
