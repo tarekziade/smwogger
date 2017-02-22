@@ -26,3 +26,11 @@ class TestAPI(unittest.TestCase):
 
         with coserver():
             api.getDefault()
+
+    def test_read_spec_from_url(self):
+        with coserver():
+            api = API('http://localhost:8888/api.yaml')
+            api.getDefault()
+
+            api = API('http://localhost:8888/api.json')
+            api.getDefault()

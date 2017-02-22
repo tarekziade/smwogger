@@ -1,5 +1,6 @@
 from bottle import response, Bottle
 import os
+import yaml
 
 
 HERE = os.path.dirname(__file__)
@@ -7,11 +8,18 @@ SPEC = os.path.join(HERE, 'absearch.yaml')
 app = application = Bottle()
 
 
-@app.route('/__api__')
-def swagger():
+@app.route('/api.yaml')
+def swagger_yaml():
     with open(SPEC) as f:
         data = f.read()
-    response.set_header('Content-Type', 'application/yaml')
+    response.set_header('Content-Type', 'text/yaml')
+    return data
+
+
+@app.route('/api.json')
+def swagger():
+    with open(SPEC) as f:
+        data = yaml.load(f.read())
     return data
 
 

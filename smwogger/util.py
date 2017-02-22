@@ -16,7 +16,7 @@ def _decoder(mime):
     if mime in _YAML_TYPES:
         return yaml.load
     # we'll just try json
-    return json.load
+    return json.loads
 
 
 def get_content(url):
@@ -26,5 +26,7 @@ def get_content(url):
             return _decoder(mime)(f.read())
     else:
         resp = requests.get(url)
-        content_type = resp.header.get('Content-Type', 'application/json')
-        return _decoder(content_type)(requests.get(url).content)
+        content_type = resp.headers.get('Content-Type', 'application/json')
+        content = requests.get(url).content
+        content = str(content, 'utf8')
+        return _decoder(content_type)(content)
