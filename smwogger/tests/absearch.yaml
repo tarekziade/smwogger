@@ -65,6 +65,12 @@ paths:
         in: path
         description: ID of pet to use
         type: string
+    /badstatus:
+      get:
+        operationId: getBadStatus
+        responses:
+          '299':
+            description: Description returned.
     /:
       get:
         operationId: getRoot

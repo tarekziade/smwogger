@@ -28,6 +28,11 @@ def someapi(*args, **kw):
     return {}
 
 
+@app.route('/badstatus')
+def badstatus():
+    return {'result': 'OK'}
+
+
 @app.route('/')
 def root():
     return {'result': 'OK'}

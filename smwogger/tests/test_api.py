@@ -41,3 +41,16 @@ class TestAPI(unittest.TestCase):
 
         echoed_headers = res.json()['headers']
         self.assertEqual(echoed_headers['Something'], 'here')
+
+    def test_bad_method(self):
+        api = API(SPEC, verbose=True)
+        try:
+            api.iDontExist()
+            raise AssertionError("WAT")
+        except AttributeError:
+            pass
+
+    def test_bad_status(self):
+        with coserver():
+            api = API('http://localhost:8888/api.yaml', verbose=True)
+            self.assertRaises(AssertionError, api.getBadStatus)

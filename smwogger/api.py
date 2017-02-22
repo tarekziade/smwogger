@@ -106,7 +106,7 @@ class API(object):
                 statuses = [int(st) for st in options['responses'].keys()]
                 if res.status_code not in statuses:
                     print("Bad Status code on %r" % options['endpoint'])
-                    statuses = ' or '.join(['%d' for s in statuses])
+                    statuses = ' or '.join(['%d' % s for s in statuses])
                     print("Wanted %s, Got %d" % (statuses, res.status_code))
                     raise AssertionError()
 
