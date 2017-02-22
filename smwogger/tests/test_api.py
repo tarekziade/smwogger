@@ -20,3 +20,9 @@ class TestAPI(unittest.TestCase):
         for attr in ('getHeartbeat', 'addUserToCohort',
                      'returnCohortSettings'):
             self.assertTrue(hasattr(api, attr))
+
+    def test_default(self):
+        api = API(SPEC)
+
+        with coserver():
+            api.getDefault()

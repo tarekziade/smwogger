@@ -49,6 +49,17 @@ x-smoke-test:
 schemes:
     - http
 paths:
+    /default:
+      get:
+        operationId: getDefault
+        description: Returns a description of the service.
+        produces:
+        - application/json
+        responses:
+          '200':
+            description: Description returned.
+          default:
+            description: Some Other Thing
     /:
       get:
         operationId: getRoot

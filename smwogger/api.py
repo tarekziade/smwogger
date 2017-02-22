@@ -95,12 +95,18 @@ class API(object):
 
         # provided by swagger
         else:
-            statuses = [int(st) for st in options['responses'].keys()]
-            if res.status_code not in statuses:
-                print("Bad Status code on %r" % options['endpoint'])
-                statuses = ' or '.join(['%d' for s in statuses])
-                print("Wanted %s, Got %d" % (statuses, res.status_code))
-                raise AssertionError()
+            if 'default' not in options['responses']:
+                # default means the status can be anything
+                # so we're skipping this test
+                # Note that in the future if we do more than asserting
+                # the status code, we will nee to iterate over the responses
+                # options even when default is present
+                statuses = [int(st) for st in options['responses'].keys()]
+                if res.status_code not in statuses:
+                    print("Bad Status code on %r" % options['endpoint'])
+                    statuses = ' or '.join(['%d' for s in statuses])
+                    print("Wanted %s, Got %d" % (statuses, res.status_code))
+                    raise AssertionError()
 
         # extracting variables if needed
         vars = resp_options.get('vars', [])
