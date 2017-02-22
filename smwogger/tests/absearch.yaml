@@ -60,6 +60,11 @@ paths:
             description: Description returned.
           default:
             description: Some Other Thing
+      parameters:
+      - name: id
+        in: path
+        description: ID of pet to use
+        type: string
     /:
       get:
         operationId: getRoot

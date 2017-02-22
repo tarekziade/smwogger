@@ -125,6 +125,8 @@ class API(object):
         for path, spec in self.spec['paths'].items():
             endpoint = urlunparse((self.scheme, self.host, path, '', '', ''))
             for verb, options in spec.items():
+                if verb == 'parameters':
+                    continue
                 verb = verb.upper()
                 options['verb'] = verb.upper()
                 options['endpoint'] = endpoint
