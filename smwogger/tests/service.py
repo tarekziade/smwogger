@@ -41,3 +41,7 @@ def root():
 @app.route('/__heartbeat__')
 def hb():
     return {'result': 'OK', 'headers': dict(request.headers)}
+
+
+if __name__ == '__main__':
+    app.run(port=8888)

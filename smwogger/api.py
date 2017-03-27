@@ -1,51 +1,27 @@
 from functools import partial
 from six.moves.urllib.parse import urlunparse
 from swagger_parser import SwaggerParser
-from aiohttp import ClientSession
-
+from molotov.session import LoggedClientSession
 from smwogger.util import get_content
-from smwogger import logger
-
-
-def print_request(req):
-    raw = '\n' + req.method + ' ' + req.url
-    if len(req.headers) > 0:
-        headers = '\n'.join('%s: %s' % (k, v) for k, v in req.headers.items())
-        raw += '\n' + headers
-
-    if req.body:
-        raw += '\n\n' + req.body + '\n'
-
-    logger.info(raw)
-
-
-def print_response(resp):
-    raw = 'HTTP/1.1 %s %s\n' % (resp.status_code, resp.reason)
-    items = resp.headers.items()
-    headers = '\n'.join('{}: {}'.format(k, v) for k, v in items)
-    raw += headers
-
-    if resp.content:
-        raw += '\n\n' + resp.content.decode()
-
-    logger.info(raw)
 
 
 class API(object):
-
-    def __init__(self, path_or_url, verbose=False, loop=None):
+    def __init__(self, path_or_url, verbose=False, loop=None,
+                 stream=None):
         self._content = get_content(path_or_url)
         self._parser = SwaggerParser(swagger_dict=self._content)
         self.spec = self._parser.specification
-        self.session = ClientSession(loop=loop)
         self.verbose = verbose
         self.host = self.spec['host']
         schemes = self.spec.get('schemes', ['https'])
         self.scheme = schemes[0]
+        self.running = True
         self._operations = self._get_operations()
+        self.session = LoggedClientSession(loop, stream, verbose=verbose)
 
     def close(self):
         self.session.close()
+        self.running = False
 
     async def __aenter__(self):
         self.session.__aenter__()
@@ -53,6 +29,8 @@ class API(object):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.session.__aexit__(exc_type, exc_val, exc_tb)
+        self.session.close()
+        self.running = False
 
     def __enter__(self):
         self.session.__enter__()
@@ -60,6 +38,8 @@ class API(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.session.__exit__(exc_type, exc_val, exc_tb)
+        self.session.close()
+        self.running = False
 
     def __getattr__(self, name):
         if name in self._operations:

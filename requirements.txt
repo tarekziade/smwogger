@@ -1,3 +1,4 @@
 aiohttp
+molotov
 swagger-parser
 six
