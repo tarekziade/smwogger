@@ -60,11 +60,12 @@ paths:
             description: Description returned.
           default:
             description: Some Other Thing
-      parameters:
-      - name: id
-        in: path
-        description: ID of pet to use
-        type: string
+        parameters:
+        - name: id
+          in: "query"
+          description: ID of pet to use
+          type: string
+          required: false
     /badstatus:
       get:
         operationId: getBadStatus

@@ -1,8 +1,8 @@
 import os
+import urllib.request
 import mimetypes
 import json
 import yaml
-import requests
 
 
 _JSON_TYPES = ('application/vnd.api+json', 'application/json')
@@ -25,8 +25,8 @@ def get_content(url):
         with open(url) as f:
             return _decoder(mime)(f.read())
     else:
-        resp = requests.get(url)
+        resp = urllib.request.urlopen(url)
         content_type = resp.headers.get('Content-Type', 'application/json')
-        content = requests.get(url).content
+        content = resp.read()
         content = str(content, 'utf8')
         return _decoder(content_type)(content)

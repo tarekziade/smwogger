@@ -2,6 +2,7 @@ import argparse
 import logging
 from functools import partial
 import imp
+import asyncio
 
 from smwogger import logger
 from smwogger.cli import console
@@ -10,11 +11,12 @@ from smwogger.smoketest import SmokeTest
 
 
 def get_runner(url, test_url=None, verbose=False):
+    api = API(url, verbose=verbose)
     if test_url and test_url.endswith('.py'):
         script = imp.load_source('script', test_url)
-        return partial(script.scenario, API(url, verbose=verbose))
+        return partial(script.scenario, api), api
     else:
-        return SmokeTest(API(url, verbose=verbose), test_url)
+        return SmokeTest(api, test_url), api
 
 
 def main():
@@ -41,7 +43,11 @@ def main():
         logger.propagate = False
 
     with console("Scanning spec"):
-        runner = get_runner(url, test_url=args.test, verbose=args.verbose)
+        runner, api = get_runner(url, test_url=args.test,
+                                 verbose=args.verbose)
+
+    loop = asyncio.get_event_loop()
+    coros = []
 
     if isinstance(runner, SmokeTest):
         spec = runner.api.spec
@@ -56,9 +62,13 @@ def main():
         for index, (oid, options) in enumerate(runner.scenario()):
             with console('%d:%s' % (index + 1, oid)):
                 try:
-                    runner(oid, **options)
+                    coros.append(runner(oid, **options))
                 except Exception:
                     raise
     else:
         print('Running Python Scenario')
-        runner()
+        coros.append(runner())
+
+    loop.run_until_complete(asyncio.gather(*coros))
+    api.close()
+    loop.close()
