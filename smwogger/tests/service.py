@@ -28,17 +28,17 @@ def someapi(*args, **kw):
     return {}
 
 
-@app.route('/badstatus')
+@app.route('/1/badstatus')
 def badstatus():
     return {'result': 'OK'}
 
 
-@app.route('/')
+@app.route('/1')
 def root():
     return {'result': 'OK'}
 
 
-@app.route('/__heartbeat__')
+@app.route('/1/__heartbeat__')
 def hb():
     return {'result': 'OK', 'headers': dict(request.headers)}
 

@@ -12,6 +12,16 @@ SPEC = os.path.join(HERE, 'absearch.yaml')
 class TestAPI(unittest.TestCase):
 
     @async_test
+    async def test_names_regular_enter_exit(self, loop):
+        with API(SPEC, verbose=True, loop=loop) as api:
+            with coserver():
+                await api.getHeartbeat()
+
+            for attr in ('getHeartbeat', 'addUserToCohort',
+                         'returnCohortSettings'):
+                self.assertTrue(hasattr(api, attr))
+
+    @async_test
     async def test_names(self, loop):
         async with API(SPEC, verbose=True, loop=loop) as api:
             with coserver():
@@ -53,6 +63,30 @@ class TestAPI(unittest.TestCase):
                 raise AssertionError("WAT")
             except AttributeError:
                 pass
+
+    @async_test
+    async def test_bad_headers(self, loop):
+        headers = {'Content-Type': 'nevergonnahappen'}
+
+        with coserver():
+            async with API('http://localhost:8888/api.yaml', verbose=True,
+                           loop=loop) as api:
+                try:
+                    await api.getHeartbeat(response={'headers': headers})
+                    raise AssertionError("WAT")
+                except AssertionError:
+                    pass
+
+    @async_test
+    async def test_bad_status2(self, loop):
+        with coserver():
+            async with API('http://localhost:8888/api.yaml', verbose=True,
+                           loop=loop) as api:
+                try:
+                    await api.getHeartbeat(response={'status': 209})
+                    raise AssertionError("WAT")
+                except AssertionError:
+                    pass
 
     @async_test
     async def test_bad_status(self, loop):
