@@ -64,7 +64,7 @@ def main():
     api = API(url, verbose=args.verbose, stream=stream)
 
     try:
-        with console("Scanning spec"):
+        with console("Scanning spec", verbose=args.verbose):
             runner = get_runner(api, url, test_url=args.test,
                                 verbose=args.verbose,
                                 stream=stream)
@@ -72,18 +72,19 @@ def main():
         coros = []
         if isinstance(runner, SmokeTest):
             spec = runner.api.spec
-            print()
-            print("\t\tThis is project %r" % spec['info']['title'])
-            print("\t\t%s" % spec['info']['description'])
-            print("\t\tVersion %s" % spec['info']['version'])
-            print()
-            print()
-
-            print('Running Scenario from x-smoke-test')
+            if args.verbose > 1:
+                print()
+                print("\t\tThis is project %r" % spec['info']['title'])
+                print("\t\t%s" % spec['info']['description'])
+                print("\t\tVersion %s" % spec['info']['version'])
+                print()
+                print()
+                print('Running Scenario from x-smoke-test')
 
             async def _scenario():
                 for index, (oid, options) in enumerate(runner.scenario()):
-                    with console('%d:%s' % (index + 1, oid)):
+                    with console('%d:%s' % (index + 1, oid),
+                                 verbose=args.verbose):
                         try:
                             await runner(oid, **options)
                         except Exception:
@@ -92,10 +93,11 @@ def main():
 
             coros.append(_scenario())
         else:
-            print('Running Python Scenario')
+            if args.verbose > 1:
+                print('Running Python Scenario')
 
             async def single_run():
-                await runner()
+                await runner(args)
                 await stream.put(DONE)
 
             coros.append(single_run())
@@ -105,3 +107,6 @@ def main():
     finally:
         api.close()
         loop.close()
+
+    if args.verbose == 0:
+        print()

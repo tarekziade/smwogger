@@ -8,13 +8,14 @@ _VARS = {'prod': 'firefox',
          'distver': 'default'}
 
 
-async def scenario(api):
-    with console('Getting heartbeat'):
+async def scenario(api, args):
+
+    with console('Getting heartbeat', verbose=args.verbose):
         resp = await api.getHeartbeat()
 
     assert resp.status == 200
 
-    with console('Playing with the cohorts'):
+    with console('Playing with the cohorts', verbose=args.verbose):
         vars = {'locale': 'en-US',
                 'territory': 'US'}
         vars.update(_VARS)

@@ -23,12 +23,18 @@ def eol():
 
 
 @contextmanager
-def console(description, success='OK', fail='FAIL'):
-    stdout(description + '... ')
+def console(description, success='OK', fail='FAIL', verbose=1):
+    if verbose > 0:
+        stdout(description + '... ')
     try:
         yield
-        stdout(bcolors.OKGREEN + success + bcolors.ENDC)
+        if verbose > 0:
+            stdout(bcolors.OKGREEN + success + bcolors.ENDC)
     except Exception:
-        stdout(bcolors.FAIL + fail + bcolors.ENDC)
+        if verbose > 0:
+            stdout(bcolors.FAIL + fail + bcolors.ENDC)
         raise
-    eol()
+    if verbose == 0:
+        stdout('.')
+    else:
+        eol()

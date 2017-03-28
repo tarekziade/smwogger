@@ -22,7 +22,6 @@ Running Scenario from x-smoke-test
 
 WANTED2 = """\
 Scanning spec... \x1b[92mOK\x1b[0m
-Running Python Scenario
 Getting heartbeat... \x1b[92mOK\x1b[0m
 Playing with the cohorts... \x1b[92mOK\x1b[0m"""
 
@@ -49,7 +48,7 @@ class TestMain(unittest.TestCase):
 
     @dedicatedloop
     def test_scenario(self):
-        options = ('smwogger', '--test', _SCENARIO,
+        options = ('smwogger', '-v', '--test', _SCENARIO,
                    'http://localhost:8888/api.json')
 
         with coserver(), set_args(*options) as out:

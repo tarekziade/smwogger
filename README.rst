@@ -13,14 +13,16 @@ Smwogger
 **Smwogger** (pronounced smoger) is a smoke test tool for Swagger.
 
 Smwogger's goal is to provide a quick and simple way to smoke
-test a deployment.
+test a service using its Swagger description.
+
 
 To add a smoke test for you API, you have three options:
 
 1. Add an **x-smoke-test** section in your Swagger spec, describing your
    smoke test scenario.
 2. Have a specific file that contains the **x-smoke-test** section.
-3. Use the API class which binds its methods to Swagger operations
+3. Use the API class which binds its methods to Swagger operations in your
+   own Python script.
 
 
 Example using x-smoke-test
@@ -29,6 +31,12 @@ Example using x-smoke-test
 You can run the test by pointing the Swagger spec URL (or path to a file)::
 
     $ smwogger smwogger/tests/shavar.yaml
+    ..................
+
+
+You can display the sequence that's being executed with **-v**::
+
+    $ smwogger -v smwogger/tests/shavar.yaml
     Scanning spec... OK
 
             This is project 'Shavar Service'
@@ -41,10 +49,10 @@ You can run the test by pointing the Swagger spec URL (or path to a file)::
     2:getDownloads... OK
     3:getDownloads... OK
 
-If you need to get details about the requests and responses sent, you can
-use the **-v** option::
+If you need to get more details about the requests and responses sent, you can
+increase verbosity with the **-vv** option::
 
-    $ smwogger -v smwogger/tests/shavar.yaml
+    $ smwogger -vv smwogger/tests/shavar.yaml
     Scanning spec... OK
 
             This is project 'Shavar Service'
@@ -254,19 +262,14 @@ you can use a plain Python script in the --test option.
 
 A Python script test is a module with a **scenario** function.
 The function will be executed and will get an instance of the API
-class.
+class and the arguments passed to the smwogger client.
 
 Example::
 
     from smwogger.cli import console
 
-    def scenario(api):
-        with console('Getting something'):
-            resp = api.getSomething()
-        assert resp.status_code == 200
-
-
-
-XXX more info here
-
+    async def scenario(api, args):
+        with console('Getting something', verbose=args.verbose):
+            resp = await api.getSomething()
+        assert resp.status == 200
 
