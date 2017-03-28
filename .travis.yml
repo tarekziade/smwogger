@@ -1,8 +1,5 @@
 language: python
 python:
   - "3.5"
-install:
-  - pip install -r requirements-test.txt
-  - pip install coveralls
-script: nosetests -s smwogger/tests/ --with-coverage --cover-package=smwogger
+script: make test
 after_success: coveralls

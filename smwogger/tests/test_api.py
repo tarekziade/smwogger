@@ -2,7 +2,7 @@ import unittest
 import os
 
 from smwogger.api import API
-from smwogger.tests.support import coserver
+from smwogger.tests.support import coserver, async_test
 
 
 HERE = os.path.dirname(__file__)
@@ -11,46 +11,65 @@ SPEC = os.path.join(HERE, 'absearch.yaml')
 
 class TestAPI(unittest.TestCase):
 
-    def test_names(self):
-        api = API(SPEC, verbose=True)
+    @async_test
+    async def test_names(self, loop):
+        async with API(SPEC, verbose=True, loop=loop) as api:
+            with coserver():
+                await api.getHeartbeat()
 
-        with coserver():
-            api.getHeartbeat()
+            for attr in ('getHeartbeat', 'addUserToCohort',
+                         'returnCohortSettings'):
+                self.assertTrue(hasattr(api, attr))
 
-        for attr in ('getHeartbeat', 'addUserToCohort',
-                     'returnCohortSettings'):
-            self.assertTrue(hasattr(api, attr))
+    @async_test
+    async def test_default(self, loop):
+        async with API(SPEC, loop=loop) as api:
+            with coserver():
+                await api.getDefault()
 
-    def test_default(self):
-        api = API(SPEC)
-
-        with coserver():
-            api.getDefault()
-
-    def test_read_spec_from_url(self):
+    @async_test
+    async def test_read_spec_from_url(self, loop):
         headers = {'Something': 'here'}
 
         with coserver():
-            api = API('http://localhost:8888/api.yaml', verbose=True)
-            api.getDefault()
+            async with API('http://localhost:8888/api.yaml', verbose=True,
+                           loop=loop) as api:
+                await api.getDefault()
 
-            api = API('http://localhost:8888/api.json', verbose=True)
-            api.getDefault()
+            async with API('http://localhost:8888/api.json', verbose=True,
+                           loop=loop) as api:
+                await api.getDefault()
+                res = await api.getHeartbeat(request={'headers': headers})
 
-            res = api.getHeartbeat(request={'headers': headers})
-
-        echoed_headers = res.json()['headers']
+        data = await res.json()
+        echoed_headers = data['headers']
         self.assertEqual(echoed_headers['Something'], 'here')
 
-    def test_bad_method(self):
-        api = API(SPEC, verbose=True)
-        try:
-            api.iDontExist()
-            raise AssertionError("WAT")
-        except AttributeError:
-            pass
+    @async_test
+    async def test_bad_method(self, loop):
+        async with API(SPEC, verbose=True, loop=loop) as api:
+            try:
+                await api.iDontExist()
+                raise AssertionError("WAT")
+            except AttributeError:
+                pass
 
-    def test_bad_status(self):
+    @async_test
+    async def test_bad_status(self, loop):
         with coserver():
-            api = API('http://localhost:8888/api.yaml', verbose=True)
-            self.assertRaises(AssertionError, api.getBadStatus)
+            async with API('http://localhost:8888/api.yaml', verbose=True,
+                           loop=loop) as api:
+                try:
+                    await api.getBadStatus()
+                    raise AssertionError("WAT")
+                except AssertionError:
+                    pass
+
+    @async_test
+    async def test_get_ops(self, loop):
+        wanted = ['addUserToCohort', 'getBadStatus', 'getDefault',
+                  'getHeartbeat', 'getInfo', 'getRoot',
+                  'returnCohortSettings']
+
+        async with API(SPEC, verbose=True, loop=loop) as api:
+            self.assertEqual(api.operations, wanted)

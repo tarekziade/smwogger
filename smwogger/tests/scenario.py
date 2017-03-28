@@ -8,16 +8,17 @@ _VARS = {'prod': 'firefox',
          'distver': 'default'}
 
 
-def scenario(api):
-    with console('Getting heartbeat'):
-        resp = api.getHeartbeat()
+async def scenario(api, args):
 
-    assert resp.status_code == 200
+    with console('Getting heartbeat', verbose=args.verbose):
+        resp = await api.getHeartbeat()
 
-    with console('Playing with the cohorts'):
+    assert resp.status == 200
+
+    with console('Playing with the cohorts', verbose=args.verbose):
         vars = {'locale': 'en-US',
                 'territory': 'US'}
         vars.update(_VARS)
-        resp = api.addUserToCohort(vars=vars)
+        resp = await api.addUserToCohort(vars=vars)
         vars['cohort'] = 'default'
-        resp = api.returnCohortSettings(vars)
+        resp = await api.returnCohortSettings(vars)

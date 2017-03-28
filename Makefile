@@ -1,6 +1,6 @@
 HERE = $(shell pwd)
 VENV = .
-VIRTUALENV = virtualenv
+VIRTUALENV = virtualenv --python `which python3`
 BIN = $(VENV)/bin
 PYTHON = $(BIN)/python
 

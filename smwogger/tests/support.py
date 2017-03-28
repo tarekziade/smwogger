@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import signal
 import os
@@ -5,6 +6,7 @@ import multiprocessing
 import time
 from contextlib import contextmanager
 from http.client import HTTPConnection
+import functools
 from io import StringIO
 
 
@@ -80,3 +82,34 @@ def set_args(*args):
         sys.stderr.seek(0)
         sys.argv[:] = old
         sys.stdout, sys.stderr = oldout, olderr
+
+
+def async_test(func):
+    @functools.wraps(func)
+    def _async_test(*args, **kw):
+        cofunc = asyncio.coroutine(func)
+        oldloop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.set_debug(True)
+        kw['loop'] = loop
+        try:
+            loop.run_until_complete(cofunc(*args, **kw))
+        finally:
+            loop.stop()
+            loop.close()
+            asyncio.set_event_loop(oldloop)
+    return _async_test
+
+
+def dedicatedloop(func):
+    @functools.wraps(func)
+    def _loop(*args, **kw):
+        old_loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return func(*args, **kw)
+        finally:
+            asyncio.set_event_loop(old_loop)
+    return _loop
