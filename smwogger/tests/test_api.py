@@ -64,3 +64,12 @@ class TestAPI(unittest.TestCase):
                     raise AssertionError("WAT")
                 except AssertionError:
                     pass
+
+    @async_test
+    async def test_get_ops(self, loop):
+        wanted = ['addUserToCohort', 'getBadStatus', 'getDefault',
+                  'getHeartbeat', 'getInfo', 'getRoot',
+                  'returnCohortSettings']
+
+        async with API(SPEC, verbose=True, loop=loop) as api:
+            self.assertEqual(api.operations, wanted)

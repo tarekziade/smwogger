@@ -264,7 +264,7 @@ A Python script test is a module with a **scenario** function.
 The function will be executed and will get an instance of the API
 class and the arguments passed to the smwogger client.
 
-Example::
+The function needs to be a coroutine. Example::
 
     from smwogger.cli import console
 
@@ -272,4 +272,26 @@ Example::
         with console('Getting something', verbose=args.verbose):
             resp = await api.getSomething()
         assert resp.status == 200
+
+
+You can also use a plain Python script if you want to handle
+everything by yourself.
+
+In the example below, the script prints out all the operation ids
+published::
+
+    import asyncio
+    from smwogger import API
+
+
+    async def print_operations():
+        async with API('http://petstore.swagger.io/v2/swagger.json') as api:
+                print(api.operations)
+
+
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(print_operations())
+        finally:
+            loop.close()
 

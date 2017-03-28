@@ -42,6 +42,11 @@ class API(object):
         self.running = False
 
     def __getattr__(self, name):
+        if name == 'operations':
+            ops = list(self._get_operations().keys())
+            ops.sort()
+            return ops
+
         if name in self._operations:
             return partial(self._caller, name)
         raise AttributeError(name)
