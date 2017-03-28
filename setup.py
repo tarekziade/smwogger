@@ -17,8 +17,11 @@ with open('CHANGELOG.rst') as f:
 
 
 setup(name='smwogger',
-      version="1.0",
+      version="1.1",
+      url="https://github.com/tarekziade/smwogger",
       packages=find_packages(),
+      author="Tarek Ziade",
+      author_email="tarek@ziade.org",
       description="Smoke Test tool",
       long_description=_DESC,
       include_package_data=True,
