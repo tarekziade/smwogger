@@ -9,13 +9,15 @@ with open('requirements.txt') as f:
 with open('README.rst') as f:
     _DESC = f.read() + '\n\n'
 
-
 with open('CONTRIBUTORS.rst') as f:
+    _DESC += f.read() + '\n\n'
+
+with open('CHANGELOG.rst') as f:
     _DESC += f.read()
 
 
 setup(name='smwogger',
-      version="0.1",
+      version="1.0",
       packages=find_packages(),
       description="Smoke Test tool",
       long_description=_DESC,
