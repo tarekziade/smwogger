@@ -13,6 +13,8 @@ class API(object):
         self.spec = self._parser.specification
         self.verbose = verbose
         self.host = self.spec['host']
+        if 'basePath' in self.spec:
+            self.host += self.spec['basePath']
         schemes = self.spec.get('schemes', ['https'])
         self.scheme = schemes[0]
         self.running = True
@@ -64,39 +66,39 @@ class API(object):
         req_options = options.get('request', {})
 
         func = getattr(self.session, verb.lower())
-
         extra = {}
-        if 'body' in req_options and 'data' not in req_options:
-            extra['data'] = req_options.pop('body')
-
-        if 'headers' in req_options:
-            extra['headers'] = req_options['headers']
+        extra['data'] = req_options.get('body') or req_options.get('data')
+        extra['headers'] = req_options.get('headers')
+        extra['params'] = req_options.get('params')
 
         async with func(endpoint, **extra) as resp:
             return await self._check_response(resp, resp_options, data_reader,
                                               options)
 
     async def _check_response(self, resp, resp_options, data_reader, options):
+        check = options.get('check', True)
         status = resp.status
 
         # provided by the scenario (maybe should put it in responses)
-        if 'status' in resp_options:
+        if check and 'status' in resp_options:
             wanted = int(resp_options['status'])
             if status != wanted:
                 print("Bad Status code on %r" % options['endpoint'])
                 print("Wanted %d, Got %d" % (wanted, status))
-                raise AssertionError()
+                body = await resp.text()
+                raise AssertionError(body)
 
-        if 'headers' in resp_options:
+        if check and 'headers' in resp_options:
             for name, expected in resp_options['headers'].items():
                 got = resp.headers.get(name)
                 if got != expected:
                     print('Bad value for header %s' % name)
                     print('Got %r, expected %r' % (got, expected))
-                    raise AssertionError()
+                    body = await resp.text()
+                    raise AssertionError(body)
 
         # provided by swagger
-        else:
+        elif check:
             if 'default' not in options['responses']:
                 # default means the status can be anything
                 # so we're skipping this test
@@ -108,14 +110,16 @@ class API(object):
                     print("Bad Status code on %r" % options['endpoint'])
                     statuses = ' or '.join(['%d' % s for s in statuses])
                     print("Wanted %s, Got %d" % (statuses, status))
-                    raise AssertionError()
+                    body = await resp.text()
+                    raise AssertionError(body)
 
         # extracting variables if needed
-        vars = resp_options.get('vars', [])
-        if vars != [] and data_reader:
+        vars = resp_options.get('vars')
+        if vars and data_reader:
             json_data = await resp.json()
+
             for varname, data in vars.items():
-                default = data['default']
+                default = data.get('default')
                 query = data['query']
                 value = json_data.get(query, default)
                 data_reader(varname, value)
