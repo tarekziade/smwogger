@@ -26,6 +26,13 @@ Getting heartbeat... \x1b[92mOK\x1b[0m
 Playing with the cohorts... \x1b[92mOK\x1b[0m"""
 
 
+WANTED3 = """\
+Scanning spec... \x1b[92mOK\x1b[0m
+Running Python Scenario
+Getting heartbeat... \x1b[92mOK\x1b[0m
+Playing with the cohorts... \x1b[92mOK\x1b[0m"""
+
+
 class TestMain(unittest.TestCase):
 
     @dedicatedloop
@@ -59,3 +66,17 @@ class TestMain(unittest.TestCase):
 
         stdout = out[0].read().strip()
         self.assertEqual(stdout, WANTED2)
+
+    @dedicatedloop
+    def test_scenario_verbose(self):
+        options = ('smwogger', '-vv', '--test', _SCENARIO,
+                   'http://localhost:8888/api.json')
+
+        with coserver(), set_args(*options) as out:
+            try:
+                main()
+            except SystemExit:
+                pass
+
+        stdout = out[0].read().strip()
+        self.assertEqual(stdout, WANTED3)
