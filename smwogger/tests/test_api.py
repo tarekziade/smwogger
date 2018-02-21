@@ -13,7 +13,7 @@ class TestAPI(unittest.TestCase):
 
     @async_test
     async def test_names_regular_enter_exit(self, loop):
-        with API(SPEC, verbose=True, loop=loop) as api:
+        async with API(SPEC, verbose=True, loop=loop) as api:
             with coserver():
                 await api.getHeartbeat()
 
