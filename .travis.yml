@@ -1,6 +1,6 @@
+dist: trusty
 language: python
-python:
-  - "3.5"
+python: 3.5
 script: make test
 after_success: coveralls
 matrix:
