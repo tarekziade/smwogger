@@ -34,15 +34,6 @@ class API(object):
         await self.session.close()
         self.running = False
 
-    def __enter__(self):
-        self.session.__enter__()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.session.__exit__(exc_type, exc_val, exc_tb)
-        self.session.close()
-        self.running = False
-
     def __getattr__(self, name):
         if name == 'operations':
             ops = list(self._get_operations().keys())
