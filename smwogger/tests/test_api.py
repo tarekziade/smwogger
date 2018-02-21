@@ -10,17 +10,6 @@ SPEC = os.path.join(HERE, 'absearch.yaml')
 
 
 class TestAPI(unittest.TestCase):
-
-    @async_test
-    async def test_names_regular_enter_exit(self, loop):
-        with API(SPEC, verbose=True, loop=loop) as api:
-            with coserver():
-                await api.getHeartbeat()
-
-            for attr in ('getHeartbeat', 'addUserToCohort',
-                         'returnCohortSettings'):
-                self.assertTrue(hasattr(api, attr))
-
     @async_test
     async def test_names(self, loop):
         async with API(SPEC, verbose=True, loop=loop) as api:

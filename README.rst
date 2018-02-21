@@ -292,6 +292,5 @@ published::
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(print_operations())
-        finally:
-            loop.close()
-
+    finally:
+        loop.close()

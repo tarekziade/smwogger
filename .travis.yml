@@ -1,5 +1,19 @@
+dist: trusty
 language: python
-python:
-  - "3.5"
-script: make test
-after_success: coveralls
+python: 3.5
+env:
+  - TOX_ENV=py35
+  - TOX_ENV=flake8
+install:
+  - pip install tox
+script:
+  - tox -e $TOX_ENV
+after_success:
+  # Report coverage results to coveralls.io
+  - pip install coveralls
+  - coveralls
+
+matrix:
+  include:
+    - python: 3.6
+      env: TOX_ENV=py36
